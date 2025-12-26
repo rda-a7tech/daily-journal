@@ -305,50 +305,44 @@
                 }
 
                 if (!selectedTheme) {
-                    generatedScriptureDisplay.innerHTML = '<p class="text-red-500">Please select a theme or specify a custom theme.</p>';
+                    generatedScriptureDisplay.innerHTML = '<p class="text-red-500">Please select a theme.</p>';
                     return;
                 }
 
-                generatedScriptureDisplay.innerHTML = 'Connecting to Google AI...'; 
+                generatedScriptureDisplay.innerHTML = 'Searching scriptures...'; 
                 scriptureLoadingSpinner.classList.remove('hidden'); 
                 generateScriptureBtn.disabled = true; 
 
-                // We use gemini-1.5-flash as it is the most stable free version
-                const prompt = `Provide a short, relevant scripture passage about ${selectedTheme} from the ESV Bible, including the verse numbers and text, formatted with line breaks.`;
-                const payload = {
-                    contents: [{ parts: [{ text: prompt }] }]
-                };
-                
-                // --- INSERT YOUR API KEY HERE ---
+                // Your key is included here
                 const apiKey = "AIzaSyBOgBAjhyjmTjV6aeUPpn3YsQYz4ESMDHc"; 
-                // --------------------------------
 
-                // Using the v1beta endpoint which is most compatible
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                // CHANGED: Using v1 instead of v1beta for better stability
+                const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
                 try {
                     const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{ text: `Provide a short, relevant scripture passage about ${selectedTheme} from the ESV Bible. Include the verse reference and text.` }]
+                            }]
+                        })
                     });
                     
                     const result = await response.json();
 
                     if (result.error) {
-                        generatedScriptureDisplay.innerHTML = `<p class="text-red-500">API Error: ${result.error.message}</p>`;
-                        return;
-                    }
-
-                    if (result.candidates && result.candidates[0].content) {
+                        // This will help us see if it's a model issue or a key issue
+                        generatedScriptureDisplay.innerHTML = `<p class="text-red-500">Error: ${result.error.message}</p>`;
+                    } else if (result.candidates && result.candidates[0].content) {
                         const text = result.candidates[0].content.parts[0].text;
                         generatedScriptureDisplay.innerHTML = text.replace(/\n/g, '<br>'); 
                     } else {
-                        generatedScriptureDisplay.innerHTML = '<p class="text-red-500">The AI returned an empty response. Try a different theme.</p>';
+                        generatedScriptureDisplay.innerHTML = '<p class="text-red-500">Unexpected response format. Please try again.</p>';
                     }
                 } catch (error) {
-                    generatedScriptureDisplay.innerHTML = '<p class="text-red-500">Network Error: Could not connect to the API. Check your internet.</p>';
-                    console.error('Error:', error);
+                    generatedScriptureDisplay.innerHTML = '<p class="text-red-500">Network Error. Check your internet or ad-blocker.</p>';
                 } finally {
                     scriptureLoadingSpinner.classList.add('hidden'); 
                     generateScriptureBtn.disabled = false; 
@@ -448,4 +442,5 @@
     </script>
 </body>
 </html>
+
 
