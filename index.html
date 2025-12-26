@@ -297,7 +297,7 @@
                 }
             });
 
-            // Function to generate scripture using Gemini API
+// Updated Function to generate scripture using Gemini API
             async function generateScripture() {
                 let selectedTheme = scriptureThemeSelect.value;
                 if (selectedTheme === 'Other') {
@@ -309,21 +309,22 @@
                     return;
                 }
 
-                generatedScriptureDisplay.innerHTML = ''; 
+                generatedScriptureDisplay.innerHTML = 'Connecting to Google AI...'; 
                 scriptureLoadingSpinner.classList.remove('hidden'); 
                 generateScriptureBtn.disabled = true; 
 
+                // We use gemini-1.5-flash as it is the most stable free version
                 const prompt = `Provide a short, relevant scripture passage about ${selectedTheme} from the ESV Bible, including the verse numbers and text, formatted with line breaks.`;
-
-                let chatHistory = [];
-                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-                const payload = { contents: chatHistory };
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }]
+                };
                 
                 // --- INSERT YOUR API KEY HERE ---
                 const apiKey = "AIzaSyBOgBAjhyjmTjV6aeUPpn3YsQYz4ESMDHc"; 
                 // --------------------------------
 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                // Using the v1beta endpoint which is most compatible
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
                 try {
                     const response = await fetch(apiUrl, {
@@ -331,20 +332,23 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
+                    
                     const result = await response.json();
 
-                    if (result.candidates && result.candidates.length > 0 &&
-                        result.candidates[0].content && result.candidates[0].content.parts &&
-                        result.candidates[0].content.parts.length > 0) {
+                    if (result.error) {
+                        generatedScriptureDisplay.innerHTML = `<p class="text-red-500">API Error: ${result.error.message}</p>`;
+                        return;
+                    }
+
+                    if (result.candidates && result.candidates[0].content) {
                         const text = result.candidates[0].content.parts[0].text;
                         generatedScriptureDisplay.innerHTML = text.replace(/\n/g, '<br>'); 
-                        // It will auto-save due to the MutationObserver added above
                     } else {
-                        generatedScriptureDisplay.innerHTML = '<p class="text-red-500">Could not generate scripture. Please try again.</p>';
+                        generatedScriptureDisplay.innerHTML = '<p class="text-red-500">The AI returned an empty response. Try a different theme.</p>';
                     }
                 } catch (error) {
-                    generatedScriptureDisplay.innerHTML = '<p class="text-red-500">Error generating scripture. Please check your connection or API key.</p>';
-                    console.error('Error calling Gemini API:', error);
+                    generatedScriptureDisplay.innerHTML = '<p class="text-red-500">Network Error: Could not connect to the API. Check your internet.</p>';
+                    console.error('Error:', error);
                 } finally {
                     scriptureLoadingSpinner.classList.add('hidden'); 
                     generateScriptureBtn.disabled = false; 
@@ -444,3 +448,4 @@
     </script>
 </body>
 </html>
+
