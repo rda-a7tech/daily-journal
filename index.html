@@ -3,86 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLA Daily Journal + Auto-Save</title>
+    <title>My Daily Journal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom styles for Inter font */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Light gray background */
+            background-color: #f3f4f6;
         }
-        /* Style for textareas to ensure good readability and height */
         textarea {
-            min-height: 8rem; /* Default minimum height */
-            resize: vertical; /* Allow vertical resizing */
+            min-height: 8rem;
+            resize: vertical;
         }
         @media (min-width: 768px) {
-            textarea {
-                min-height: 6rem; /* Slightly smaller on larger screens if needed */
-            }
+            textarea { min-height: 6rem; }
         }
-        /* Modal specific styles */
+        /* Modal styles */
         .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
+            display: none;
+            position: fixed;
+            z-index: 1000;
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
             justify-content: center;
             align-items: center;
         }
         .modal-content {
             background-color: #fefefe;
-            margin: auto;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            position: relative;
             max-width: 500px;
             width: 90%;
             text-align: center;
             animation: fadeIn 0.3s ease-out;
         }
-        .close-button {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            cursor: pointer;
-            transition: color 0.2s ease-in-out;
-        }
-        .close-button:hover,
-        .close-button:focus {
-            color: #333;
-            text-decoration: none;
-            cursor: pointer;
-        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-        .loading-spinner {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #3498db; /* Blue */
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-            margin-left: 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -90,7 +50,7 @@
 
     <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-6 md:p-8 lg:p-10 border border-gray-200">
         <div class="mb-8 text-center">
-            <h1 class="text-4xl font-extrabold text-blue-800 mb-2 rounded-lg p-2 inline-block bg-blue-50">MLA Daily Journal</h1>
+            <h1 class="text-4xl font-extrabold text-blue-800 mb-2 rounded-lg p-2 inline-block bg-blue-50">My Daily Journal</h1>
             <p id="current-date" class="text-xl font-medium text-gray-600 mt-2"></p>
             <p class="text-xs text-green-600 mt-1 font-semibold" id="auto-save-indicator" style="opacity: 0; transition: opacity 0.5s;">Saved to browser storage ✓</p>
         </div>
@@ -99,96 +59,48 @@
             <h2 class="text-2xl font-semibold text-blue-700 mb-4 flex items-center">
                 <span class="mr-3 text-3xl">📖</span> Scripture Reflection
             </h2>
-
-            <div class="mb-4">
-                <label for="scripture-theme-select" class="block text-lg font-medium text-gray-700 mb-2">
-                    Select a Theme:
-                </label>
-                <select id="scripture-theme-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-150 ease-in-out">
-                    <option value="">-- Choose a Theme --</option>
-                    <option value="Hope">Hope</option>
-                    <option value="Strength">Strength</option>
-                    <option value="Guidance">Guidance</option>
-                    <option value="Peace">Peace</option>
-                    <option value="Love">Love</option>
-                    <option value="Faith">Faith</option>
-                    <option value="Provision">Provision</option>
-                    <option value="Forgiveness">Forgiveness</option>
-                    <option value="Wisdom">Wisdom</option>
-                    <option value="Patience">Patience</option>
-                    <option value="Joy">Joy</option>
-                    <option value="Other">Other (Specify Below)</option>
-                </select>
-            </div>
-
-            <div id="custom-theme-input-group" class="mb-4 hidden">
-                <label for="custom-scripture-theme" class="block text-lg font-medium text-gray-700 mb-2">
-                    Specify Custom Theme:
-                </label>
-                <input type="text" id="custom-scripture-theme" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-150 ease-in-out" placeholder="e.g., Perseverance, Humility, Grace">
-            </div>
-
-            <div class="mb-6 text-center">
-                <button id="generate-scripture-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                    Generate Scripture
-                </button>
-                <span id="scripture-loading-spinner" class="loading-spinner hidden"></span>
-            </div>
-
-            <label for="generated-scripture-display" class="block text-lg font-medium text-gray-700 mb-2">
-                Generated Scripture:
-            </label>
-            <div id="generated-scripture-display" class="text-lg text-gray-700 leading-relaxed mb-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm min-h-[100px] overflow-auto">
-                Select a theme (or specify 'Other') and click "Generate Scripture" to get a passage.
-            </div>
-
             <label for="scripture-reflection-input" class="block text-lg font-medium text-gray-700 mb-2 flex items-center">
-                <span class="mr-2 text-2xl">🖊</span> What stands out to me in this passage?
-                <span class="ml-2 text-sm italic text-gray-500"> — Focus on your key takeaways from the scripture.</span>
+                <span class="mr-2 text-2xl">🖊</span> What scripture am I reflecting on?
+                <span class="ml-2 text-sm italic text-gray-500"> — Paste the verse and your thoughts below.</span>
             </label>
-            <textarea id="scripture-reflection-input" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-150 ease-in-out" placeholder="My key takeaways and reflections on the scripture..."></textarea>
+            <textarea id="scripture-reflection-input" rows="6" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-150 ease-in-out" placeholder="Paste scripture here and write what stands out to you..."></textarea>
         </div>
 
         <div class="mb-8 p-6 bg-green-50 border border-green-200 rounded-lg shadow-md">
             <label for="mood-check-in-input" class="block text-xl font-medium text-gray-700 mb-2 flex items-center">
                 <span class="mr-2 text-2xl">😊</span> Mood Check-in
-                <span class="ml-2 text-sm italic text-gray-500"> — Describe how you feel and why.</span>
             </label>
-            <textarea id="mood-check-in-input" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 shadow-sm transition duration-150 ease-in-out" placeholder="Today I feel ___ because ___. (e.g., Today I feel grateful because I had a productive morning.)"></textarea>
+            <textarea id="mood-check-in-input" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 shadow-sm transition duration-150 ease-in-out" placeholder="Today I feel ___ because ___."></textarea>
         </div>
 
         <div class="mb-8 p-6 bg-yellow-50 border border-yellow-200 rounded-lg shadow-md">
             <label for="what-happened-today-input" class="block text-xl font-medium text-gray-700 mb-2 flex items-center">
                 <span class="mr-2 text-2xl">📅</span> What Happened Today?
-                <span class="ml-2 text-sm italic text-gray-500"> — Note key events, conversations, struggles, or small wins.</span>
             </label>
-            <textarea id="what-happened-today-input" rows="5" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 shadow-sm transition duration-150 ease-in-out" placeholder="Notable moments: (meetings, conversations, struggles, small wins)&#10;e.g., - Had a great team meeting about the new project.&#10;- Struggled with a challenging coding bug for an hour.&#10;- Celebrated a small win by finishing an urgent task."></textarea>
+            <textarea id="what-happened-today-input" rows="5" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 shadow-sm transition duration-150 ease-in-out" placeholder="Notable moments, conversations, or struggles..."></textarea>
         </div>
 
         <div class="mb-8 p-6 bg-purple-50 border border-purple-200 rounded-lg shadow-md">
             <label for="spiritual-sense-input" class="block text-xl font-medium text-gray-700 mb-2 flex items-center">
-                <span class="mr-2 text-2xl">🕊️</span> What Did I Hear from God or Sense Spiritually?
-                <span class="ml-2 text-sm italic text-gray-500"> — Reflect on spiritual insights or messages received.</span>
+                <span class="mr-2 text-2xl">🕊️</span> Hearing from God
             </label>
-            <textarea id="spiritual-sense-input" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 shadow-sm transition duration-150 ease-in-out" placeholder="I feel God may be saying/showing me ___. (e.g., I feel God may be saying/showing me to trust more in His provision even when things are uncertain.)"></textarea>
+            <textarea id="spiritual-sense-input" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 shadow-sm transition duration-150 ease-in-out" placeholder="What did I sense spiritually today?"></textarea>
         </div>
 
         <div class="mb-8 p-6 bg-red-50 border border-red-200 rounded-lg shadow-md">
             <label for="pattern-noticed-input" class="block text-xl font-medium text-gray-700 mb-2 flex items-center">
                 <span class="mr-2 text-2xl">🧠</span> Self-Awareness + Insight
-                <span class="ml-2 text-sm italic text-gray-500"> — Identify patterns and their potential meaning.</span>
             </label>
-            <textarea id="pattern-noticed-input" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 shadow-sm transition duration-150 ease-in-out mb-4" placeholder="I noticed a pattern or thought: ___. (e.g., I noticed a pattern of procrastinating on challenging tasks.)"></textarea>
-            <textarea id="meaning-insight-input" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 shadow-sm transition duration-150 ease-in-out" placeholder="This could mean ___. (e.g., This could mean I need to break down tasks into smaller steps or address underlying anxiety.)"></textarea>
+            <textarea id="pattern-noticed-input" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 shadow-sm transition duration-150 ease-in-out mb-4" placeholder="I noticed a pattern or thought: ___"></textarea>
+            <textarea id="meaning-insight-input" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 shadow-sm transition duration-150 ease-in-out" placeholder="This could mean ___"></textarea>
         </div>
 
         <div class="mb-8 p-6 bg-indigo-50 border border-indigo-200 rounded-lg shadow-md">
             <label for="prayer-request-input" class="block text-xl font-medium text-gray-700 mb-2 flex items-center">
                 <span class="mr-2 text-2xl">🙏</span> Next Step or Prayer
-                <span class="ml-2 text-sm italic text-gray-500"> — State your prayer requests and tomorrow's focus.</span>
             </label>
-            <textarea id="prayer-request-input" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition duration-150 ease-in-out mb-4" placeholder="Lord, I need help with ___. (e.g., Lord, I need help with managing my time effectively and prioritizing tasks.)"></textarea>
-            <textarea id="tomorrow-focus-input" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition duration-150 ease-in-out" placeholder="Tomorrow I want to ___. (e.g., Tomorrow I want to start my day with prayer and focus on one major task before checking emails.)"></textarea>
+            <textarea id="prayer-request-input" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition duration-150 ease-in-out mb-4" placeholder="Lord, I need help with ___"></textarea>
+            <textarea id="tomorrow-focus-input" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition duration-150 ease-in-out" placeholder="Tomorrow I want to focus on ___"></textarea>
         </div>
 
         <div class="flex flex-col md:flex-row justify-center items-center gap-4 mt-10">
@@ -203,244 +115,78 @@
 
     <div id="saveModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" id="closeModalBtn">&times;</span>
             <h3 class="text-2xl font-bold text-gray-800 mb-4">Journal Entry Saved!</h3>
-            <p class="text-lg text-gray-700 mb-4">Your journal entry has been downloaded as a text file.</p>
-            <p class="text-md text-gray-600 mb-6">
-                <strong>Tip:</strong> The form is still saved in your browser. Click "Start New Entry" at the bottom if you want to clear it for tomorrow.
-            </p>
-            <button id="okModalBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-300">
+            <p class="text-lg text-gray-700 mb-6">Your entry has been downloaded. The form will remain saved in your browser until you clear it.</p>
+            <button id="okModalBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition duration-300 ease-in-out">
                 OK
             </button>
         </div>
     </div>
 
     <script>
-        // Set the current date dynamically
         document.addEventListener('DOMContentLoaded', () => {
             const dateElement = document.getElementById('current-date');
             const today = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-            const formattedDate = today.toLocaleDateString('en-US', options);
-            const dateForFilename = today.toISOString().slice(0, 10); //YYYY-MM-DD
+            const formattedDate = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+            const dateForFilename = today.toISOString().slice(0, 10);
             dateElement.textContent = formattedDate;
 
-            // Elements
-            const scriptureThemeSelect = document.getElementById('scripture-theme-select');
-            const customThemeInputGroup = document.getElementById('custom-theme-input-group');
-            const customScriptureThemeInput = document.getElementById('custom-scripture-theme');
-            const generateScriptureBtn = document.getElementById('generate-scripture-btn');
-            const generatedScriptureDisplay = document.getElementById('generated-scripture-display');
-            const scriptureLoadingSpinner = document.getElementById('scripture-loading-spinner');
             const saveButton = document.getElementById('save-journal-btn');
             const clearButton = document.getElementById('clear-form-btn');
             const saveModal = document.getElementById('saveModal');
-            const closeModalBtn = document.getElementById('closeModalBtn');
             const okModalBtn = document.getElementById('okModalBtn');
             const autoSaveIndicator = document.getElementById('auto-save-indicator');
+            const formInputs = document.querySelectorAll('textarea');
 
-            // --- AUTO-SAVE FUNCTIONALITY ---
-            // Select all inputs that should be saved
-            const formInputs = document.querySelectorAll('textarea, input[type="text"], select');
-            
-            // 1. Load saved data on startup
+            // 1. Auto-Load from Browser Storage
             formInputs.forEach(input => {
-                const savedValue = localStorage.getItem('mla_journal_' + input.id);
-                if (savedValue) {
-                    input.value = savedValue;
-                    // Special trigger for custom theme display
-                    if (input.id === 'scripture-theme-select' && savedValue === 'Other') {
-                        customThemeInputGroup.classList.remove('hidden');
-                    }
-                }
+                const savedValue = localStorage.getItem('My_journal_' + input.id);
+                if (savedValue) input.value = savedValue;
             });
 
-            // Restore the generated scripture div content specifically (since it's a div, not an input)
-            const savedScriptureText = localStorage.getItem('mla_journal_generated_scripture');
-            if (savedScriptureText) {
-                generatedScriptureDisplay.innerHTML = savedScriptureText;
-            }
-
-            // 2. Save data on input change
+            // 2. Auto-Save on Type
             const showSavedIndicator = () => {
                 autoSaveIndicator.style.opacity = '1';
-                setTimeout(() => { autoSaveIndicator.style.opacity = '0'; }, 2000);
+                setTimeout(() => { autoSaveIndicator.style.opacity = '0'; }, 1500);
             };
 
             formInputs.forEach(input => {
                 input.addEventListener('input', () => {
-                    localStorage.setItem('mla_journal_' + input.id, input.value);
-                    showSavedIndicator();
-                });
-                // For select boxes, listen to 'change'
-                input.addEventListener('change', () => {
-                    localStorage.setItem('mla_journal_' + input.id, input.value);
+                    localStorage.setItem('My_journal_' + input.id, input.value);
                     showSavedIndicator();
                 });
             });
 
-            // Save the generated scripture div whenever it changes
-            const observer = new MutationObserver(() => {
-                localStorage.setItem('mla_journal_generated_scripture', generatedScriptureDisplay.innerHTML);
-            });
-            observer.observe(generatedScriptureDisplay, { childList: true, subtree: true, characterData: true });
+            // 3. Download / Save Logic
+            saveButton.addEventListener('click', () => {
+                let content = `My Journal Entry – ${formattedDate}\n\n`;
+                content += `📖 SCRIPTURE REFLECTION:\n${document.getElementById('scripture-reflection-input').value}\n\n`;
+                content += `😊 MOOD:\n${document.getElementById('mood-check-in-input').value}\n\n`;
+                content += `📅 WHAT HAPPENED:\n${document.getElementById('what-happened-today-input').value}\n\n`;
+                content += `🕊️ SPIRITUAL SENSE:\n${document.getElementById('spiritual-sense-input').value}\n\n`;
+                content += `🧠 INSIGHT:\n${document.getElementById('pattern-noticed-input').value}\n${document.getElementById('meaning-insight-input').value}\n\n`;
+                content += `🙏 PRAYER/FOCUS:\n${document.getElementById('prayer-request-input').value}\nTomorrow: ${document.getElementById('tomorrow-focus-input').value}`;
 
-
-            // Toggle custom theme input visibility
-            scriptureThemeSelect.addEventListener('change', () => {
-                if (scriptureThemeSelect.value === 'Other') {
-                    customThemeInputGroup.classList.remove('hidden');
-                } else {
-                    customThemeInputGroup.classList.add('hidden');
-                    customScriptureThemeInput.value = ''; 
-                    localStorage.setItem('mla_journal_custom-scripture-theme', ''); // Clear from storage too
-                }
-            });
-
-// Updated Function to generate scripture using Gemini API
-            async function generateScripture() {
-                let selectedTheme = scriptureThemeSelect.value;
-                if (selectedTheme === 'Other') {
-                    selectedTheme = customScriptureThemeInput.value.trim();
-                }
-
-                if (!selectedTheme) {
-                    generatedScriptureDisplay.innerHTML = '<p class="text-red-500">Please select a theme.</p>';
-                    return;
-                }
-
-                generatedScriptureDisplay.innerHTML = 'Searching scriptures...'; 
-                scriptureLoadingSpinner.classList.remove('hidden'); 
-                generateScriptureBtn.disabled = true; 
-
-                // Your key is included here
-                const apiKey = "AIzaSyBOgBAjhyjmTjV6aeUPpn3YsQYz4ESMDHc"; 
-
-                // CHANGED: Using v1 instead of v1beta for better stability
-                const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [{ text: `Provide a short, relevant scripture passage about ${selectedTheme} from the ESV Bible. Include the verse reference and text.` }]
-                            }]
-                        })
-                    });
-                    
-                    const result = await response.json();
-
-                    if (result.error) {
-                        // This will help us see if it's a model issue or a key issue
-                        generatedScriptureDisplay.innerHTML = `<p class="text-red-500">Error: ${result.error.message}</p>`;
-                    } else if (result.candidates && result.candidates[0].content) {
-                        const text = result.candidates[0].content.parts[0].text;
-                        generatedScriptureDisplay.innerHTML = text.replace(/\n/g, '<br>'); 
-                    } else {
-                        generatedScriptureDisplay.innerHTML = '<p class="text-red-500">Unexpected response format. Please try again.</p>';
-                    }
-                } catch (error) {
-                    generatedScriptureDisplay.innerHTML = '<p class="text-red-500">Network Error. Check your internet or ad-blocker.</p>';
-                } finally {
-                    scriptureLoadingSpinner.classList.add('hidden'); 
-                    generateScriptureBtn.disabled = false; 
-                }
-            }
-
-            generateScriptureBtn.addEventListener('click', generateScripture);
-
-            // Function to collect all journal entry data
-            const collectJournalData = () => {
-                const scriptureText = generatedScriptureDisplay.textContent;
-                let effectiveTheme = scriptureThemeSelect.value;
-                if (effectiveTheme === 'Other') {
-                    effectiveTheme = customScriptureThemeInput.value.trim() || 'Custom Theme (Not Specified)';
-                } else if (effectiveTheme === '') {
-                    effectiveTheme = 'Not Selected';
-                }
-
-                const scriptureReflection = document.getElementById('scripture-reflection-input').value;
-                const moodCheckIn = document.getElementById('mood-check-in-input').value;
-                const whatHappenedToday = document.getElementById('what-happened-today-input').value;
-                const spiritualSense = document.getElementById('spiritual-sense-input').value;
-                const patternNoticed = document.getElementById('pattern-noticed-input').value;
-                const meaningInsight = document.getElementById('meaning-insight-input').value;
-                const prayerRequest = document.getElementById('prayer-request-input').value;
-                const tomorrowFocus = document.getElementById('tomorrow-focus-input').value;
-
-                let journalContent = `MLA Journal Entry – ${formattedDate}\n\n`;
-
-                journalContent += `📖 Scripture Reflection\n`;
-                journalContent += `Theme: ${effectiveTheme}\n`;
-                journalContent += `Generated Scripture:\n${scriptureText}\n\n`;
-                journalContent += `What stands out to me in this passage:\n${scriptureReflection}\n\n`;
-
-                journalContent += `😊 Mood Check-in\nToday I feel ${moodCheckIn}\n\n`;
-
-                journalContent += `📅 What Happened Today?\nNotable moments: ${whatHappenedToday}\n\n`;
-
-                journalContent += `🕊️ What Did I Hear from God or Sense Spiritually?\nI feel God may be saying/showing me ${spiritualSense}\n\n`;
-
-                journalContent += `🧠 Self-Awareness + Insight\nI noticed a pattern or thought: ${patternNoticed}\n`;
-                journalContent += `This could mean: ${meaningInsight}\n\n`;
-
-                journalContent += `🙏 Next Step or Prayer\nLord, I need help with: ${prayerRequest}\n`;
-                journalContent += `Tomorrow I want to: ${tomorrowFocus}\n`;
-
-                return journalContent;
-            };
-
-            const downloadJournalEntry = (content, filename) => {
-                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const blob = new Blob([content], { type: 'text/plain' });
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = filename;
-                document.body.appendChild(a);
+                a.download = `My_Journal_${dateForFilename}.txt`;
                 a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(a.href);
-            };
-
-            saveButton.addEventListener('click', () => {
-                const journalContent = collectJournalData();
-                const filename = `MLA_Journal_${dateForFilename}.txt`;
-                downloadJournalEntry(journalContent, filename);
                 saveModal.style.display = 'flex';
             });
 
-            // Clear Button Logic
+            // 4. Clear Form
             clearButton.addEventListener('click', () => {
-                if (confirm("Are you sure you want to clear the form? This will remove all text and reset the page for a new entry.")) {
-                    // 1. Clear textareas and inputs
+                if (confirm("Clear all text for a new entry?")) {
                     formInputs.forEach(input => {
                         input.value = '';
-                        localStorage.removeItem('mla_journal_' + input.id);
+                        localStorage.removeItem('My_journal_' + input.id);
                     });
-                    
-                    // 2. Clear generated scripture
-                    generatedScriptureDisplay.innerHTML = 'Select a theme (or specify \'Other\') and click "Generate Scripture" to get a passage.';
-                    localStorage.removeItem('mla_journal_generated_scripture');
-
-                    // 3. Reset select to default
-                    scriptureThemeSelect.value = '';
-                    customThemeInputGroup.classList.add('hidden');
-                    
-                    alert("Form cleared and ready for a new entry!");
                 }
             });
 
-            closeModalBtn.addEventListener('click', () => { saveModal.style.display = 'none'; });
             okModalBtn.addEventListener('click', () => { saveModal.style.display = 'none'; });
-            window.addEventListener('click', (event) => {
-                if (event.target == saveModal) {
-                    saveModal.style.display = 'none';
-                }
-            });
         });
     </script>
 </body>
 </html>
-
-
